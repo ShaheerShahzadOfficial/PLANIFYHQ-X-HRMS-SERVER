@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "name": "Planify X hrms",
+  "builds": [{ "src": "backend/index.js", "use": "@vercel/node" }],
+  "routes": [{ "src": "/(.*)", "dest": "/backend/index.js" }]
+}
