@@ -3,6 +3,8 @@ import cors from "cors";
 import morgan from "morgan";
 import planRouter from "./route/plan.js";
 import userRouter from "./route/users.js";
+import departmentRouter from "./route/department.js";
+import designationRouter from "./route/designation.js";
 
 const app = express();
 app.use(
@@ -67,6 +69,8 @@ app.get("/", (req, res) => {
 
 app.use("/plan", planRouter);
 app.use("/user", userRouter);
+app.use("/department", departmentRouter);
+app.use("/designation", designationRouter);
 app.use((req, res) => {
   res.status(404).send(`
     <html>

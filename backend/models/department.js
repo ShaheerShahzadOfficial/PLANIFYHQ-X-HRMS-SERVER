@@ -1,15 +1,13 @@
 import mongoose from "mongoose";
 
-const planSchema = new mongoose.Schema({
+const departmentSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  price: { type: Number, required: true },
-  features: [{ type: String, required: false }],
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
   status: { type: String, enum: ["active", "inactive"], default: "active" },
-  isDeleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-const Plan = mongoose.model("Plans", planSchema);
+const Department = mongoose.model("Departments", departmentSchema);
 
-export default Plan;
+export default Department;

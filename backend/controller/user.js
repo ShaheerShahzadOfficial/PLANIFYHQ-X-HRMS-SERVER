@@ -2,13 +2,14 @@ import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import cloudinary from "cloudinary";
 import jwt from "jsonwebtoken";
+import { parse } from "date-fns";
 export const createUser = async (req, res) => {
   const {
     name,
     email,
     password,
     phoneNumber,
-    role,
+    role = "admin",
     website,
     profile,
     address,
@@ -56,7 +57,8 @@ export const createUser = async (req, res) => {
 
   // Validate website format if provided
   if (website) {
-    const urlRegex = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+    const urlRegex =
+      /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
     if (!urlRegex.test(website)) {
       return res.status(400).json({ message: "Invalid website URL format" });
     }
@@ -121,8 +123,73 @@ export const loginUser = async (req, res) => {
   if (!isPasswordValid) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
+  const token = jwt.sign(
+    { userId: user._id, email: user.email, role: user.role },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "1h",
+    }
+  );
   res.status(200).json({ message: "Login successful", user, token });
 };
+
+export const CREATE_EMPLOYEE = async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      phoneNumber,
+      role,
+      profile,
+      designation,
+      department,
+      about,
+      joinedAt,
+      employeeId,
+    } = req.body;
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    let profileData = {};
+    if (profile) {
+      // Upload image to cloudinary
+      const result = await cloudinary.uploader.upload(profile, {
+        folder: "profiles",
+      });
+      profileData = {
+        url: result.secure_url,
+        public_id: result.public_id,
+      };
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      phoneNumber,
+      role,
+      profile: profileData,
+      companyId: req.user.userId,
+      designation,
+      department,
+      about,
+      joinedAt: parse(joinedAt, "dd-MM-yyyy", new Date()),
+      employeeId,
+    });
+
+    res.status(200).json({ message: "Employee created successfully", user });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error creating employee",
+      error: error.message,
+    });
+  }
+};
+
+export const GET_EMPLOYEES = async (req, res) => {
+  const employees = await User.find({ role: "employee", companyId: req.user.userId });
+  res.status(200).json({ message: "Employees fetched successfully", employees });
+};
+

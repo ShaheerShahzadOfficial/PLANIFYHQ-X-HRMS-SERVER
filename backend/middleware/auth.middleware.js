@@ -9,7 +9,7 @@ function auth(req, res, next) {
       Error: "Please Login to access this resource",
     });
   }
-
+  console.log(token);
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
       console.log(err);

@@ -10,10 +10,7 @@ const userSchema = new mongoose.Schema({
     enum: ["superadmin", "company", "employee"],
     default: "employee",
   },
-  designation: { 
-    type: String,
-     required: false,
-    },
+
   website: { type: String, required: false },
   profile: {
     url: String,
@@ -21,7 +18,7 @@ const userSchema = new mongoose.Schema({
   },
   address: {
     type: String,
-  }, 
+  },
   planId: { type: mongoose.Schema.Types.ObjectId, ref: "Plans" },
   status: { type: String, default: "active" },
   language: { type: String, default: "en" },
@@ -31,6 +28,24 @@ const userSchema = new mongoose.Schema({
     enum: ["USD", "EUR", "GBP", "INR", "PKR"],
     default: "PKR",
   },
+  designation: {
+    type: String,
+    required: false,
+  },
+  joinedAt: { type: Date, default: Date.now },
+  employeeId: { type: String, required: false },
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Departments",
+    required: false,
+  },
+  designation: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Designations",
+    required: false,
+  },
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
+  about: { type: String, required: false },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
