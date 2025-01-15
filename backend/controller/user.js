@@ -189,7 +189,11 @@ export const CREATE_EMPLOYEE = async (req, res) => {
 };
 
 export const GET_EMPLOYEES = async (req, res) => {
-  const employees = await User.find({ role: "employee", companyId: req.user.userId });
+  const employees = await User.find({ role: "employee", companyId: req.user.userId }).select("-password").populate("designation department");
   res.status(200).json({ message: "Employees fetched successfully", employees });
 };
 
+export const GET_COMPANIES = async (req, res) => {
+  const companies = await User.find({ role: "admin" }).select("-password").populate("planId");
+  res.status(200).json({ message: "Companies fetched successfully", companies });
+};
