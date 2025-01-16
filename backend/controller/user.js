@@ -119,6 +119,9 @@ export const loginUser = async (req, res) => {
   if (!user) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
+  if (user.isDeleted || user.status === "inactive") {
+    return res.status(401).json({ message: "Account is disabled" });
+  }
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     return res.status(401).json({ message: "Invalid email or password" });
@@ -189,11 +192,117 @@ export const CREATE_EMPLOYEE = async (req, res) => {
 };
 
 export const GET_EMPLOYEES = async (req, res) => {
-  const employees = await User.find({ role: "employee", companyId: req.user.userId }).select("-password").populate("designation department");
-  res.status(200).json({ message: "Employees fetched successfully", employees });
+  const employees = await User.find({
+    role: "employee",
+    companyId: req.user.userId,
+  })
+    .select("-password")
+    .populate("designation department");
+  res
+    .status(200)
+    .json({ message: "Employees fetched successfully", employees });
+};
+
+export const UPDATE_EMPLOYEE = async (req, res) => {
+  const { id } = req.params;
+  const {
+    name,
+    email,
+    phoneNumber,
+    designation,
+    department,
+    about,
+    joinedAt,
+    employeeId,
+  } = req.body;
+  const employee = await User.findByIdAndUpdate(
+    id,
+    {
+      name,
+      email,
+      phoneNumber,
+      designation,
+      department,
+      about,
+      joinedAt,
+      employeeId,
+    },
+    { new: true }
+  );
+  res.status(200).json({ message: "Employee updated successfully", employee });
+};
+
+export const DELETE_EMPLOYEE = async (req, res) => {
+  const { id } = req.params;
+  const employee = await User.findByIdAndDelete(id);
+  res.status(200).json({ message: "Employee deleted successfully", employee });
 };
 
 export const GET_COMPANIES = async (req, res) => {
-  const companies = await User.find({ role: "admin" }).select("-password").populate("planId");
-  res.status(200).json({ message: "Companies fetched successfully", companies });
+  const companies = await User.find({ role: "admin" })
+    .select("-password")
+    .populate("planId");
+  res
+    .status(200)
+    .json({ message: "Companies fetched successfully", companies });
+};
+
+export const UPDATE_COMPANY = async (req, res) => {
+  const { id } = req.params;
+  const {
+    name,
+    email,
+    phoneNumber,
+    designation,
+    department,
+    about,
+    joinedAt,
+    employeeId,
+  } = req.body;
+  const employee = await User.findByIdAndUpdate(
+    id,
+    {
+      name,
+      email,
+      phoneNumber,
+      designation,
+      department,
+      about,
+      joinedAt,
+      employeeId,
+    },
+    { new: true }
+  );
+  res.status(200).json({ message: "Employee updated successfully", employee });
+};
+
+export const DELETE_COMPANY = async (req, res) => {
+  const { id } = req.params;
+  const company = await User.findByIdAndDelete(id);
+  const employees = await User.find({ companyId: id });
+  employees.forEach(async (employee) => {
+    await User.findByIdAndDelete(employee._id);
+  });
+  res.status(200).json({ message: "Company deleted successfully", company });
+};
+
+export const DISABLE_COMPANY_EMPLOYEES_ACCOUNT = async (req, res) => {
+  const { id } = req.params;
+  const company = await User.findByIdAndUpdate(
+    id,
+    { isDeleted: true, status: "inactive" },
+    { new: true }
+  );
+  const employees = await User.find({ companyId: id });
+  employees.forEach(async (employee) => {
+    await User.findByIdAndUpdate(
+      employee._id,
+      { isDeleted: true, status: "inactive" },
+      { new: true }
+    );
+  });
+  res.status(200).json({
+    message: "Company employees account disabled successfully",
+    company,
+  });
 };
