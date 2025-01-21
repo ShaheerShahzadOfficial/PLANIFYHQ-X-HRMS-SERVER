@@ -5,6 +5,7 @@ import planRouter from "./route/plan.js";
 import userRouter from "./route/users.js";
 import departmentRouter from "./route/department.js";
 import designationRouter from "./route/designation.js";
+import attendanceRouter from "./route/attendence.js";
 
 const app = express();
 app.use(
@@ -71,6 +72,7 @@ app.use("/plan", planRouter);
 app.use("/user", userRouter);
 app.use("/department", departmentRouter);
 app.use("/designation", designationRouter);
+app.use("/attendance", attendanceRouter);
 app.use((req, res) => {
   res.status(404).send(`
     <html>

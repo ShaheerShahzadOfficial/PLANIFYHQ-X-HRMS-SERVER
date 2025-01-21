@@ -12,7 +12,10 @@ const shiftSchedulingSchema = new mongoose.Schema({
   minEndTime: Date,
   maxEndTime: Date,
 
-  
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 
   status: {
     type: String,

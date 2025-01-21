@@ -8,10 +8,12 @@ const attendenceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
 });
 
 const Attendence = mongoose.model("Attendence", attendenceSchema);
 
 export default Attendence;
-
-    
