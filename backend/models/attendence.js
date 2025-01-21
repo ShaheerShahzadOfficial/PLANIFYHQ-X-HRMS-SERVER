@@ -6,11 +6,11 @@ const attendenceSchema = new mongoose.Schema({
   timeOut: Date,
   employee: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
   },
   company: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
   },
 });
 

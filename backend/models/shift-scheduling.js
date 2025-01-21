@@ -25,7 +25,7 @@ const shiftSchedulingSchema = new mongoose.Schema({
   for: {
     // employee ID
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
   },
   shiftID: {
     type: mongoose.Schema.Types.ObjectId,
@@ -33,7 +33,7 @@ const shiftSchedulingSchema = new mongoose.Schema({
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
   },
   isDeleted: { type: Boolean, default: false },
 });

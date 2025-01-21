@@ -4,7 +4,7 @@ const shiftSchema = new mongoose.Schema({
   name: String,
   company: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
   },
 });
 

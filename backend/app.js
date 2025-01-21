@@ -6,6 +6,11 @@ import userRouter from "./route/users.js";
 import departmentRouter from "./route/department.js";
 import designationRouter from "./route/designation.js";
 import attendanceRouter from "./route/attendence.js";
+import emergencyRouter from "./route/emergency.js";
+import personalInfoRouter from "./route/personalInfo.js";
+import educationRouter from "./route/education.js";
+import experienceRouter from "./route/experience.js";
+import bankDetailsRouter from "./route/bank-account.js";
 
 const app = express();
 app.use(
@@ -73,6 +78,11 @@ app.use("/user", userRouter);
 app.use("/department", departmentRouter);
 app.use("/designation", designationRouter);
 app.use("/attendance", attendanceRouter);
+app.use("/emergency", emergencyRouter);
+app.use("/personal-info", personalInfoRouter);
+app.use("/education", educationRouter);
+app.use("/experience", experienceRouter);
+app.use("/bank-account", bankDetailsRouter);
 app.use((req, res) => {
   res.status(404).send(`
     <html>

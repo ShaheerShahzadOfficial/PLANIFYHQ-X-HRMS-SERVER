@@ -1,19 +1,26 @@
-import Attendence from "../models/attendence.js"
+import Attendence from "../models/attendence.js";
+import User from "../models/user.js";
 export const CHECKIN = async (req, res) => {
   try {
     const employeeId = req.user.userId;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    const user = await User.findById(employeeId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     // Check if already checked in today
     const existingAttendance = await Attendence.findOne({
-      employeeId,
+      employee: employeeId,
       date: today,
-    
+      company: user.companyId,
     });
 
     if (existingAttendance) {
-      if (existingAttendance.checkIn) {
+      if (existingAttendance.timeIn) {
         return res
           .status(400)
           .json({ message: "Already checked in for today" });
@@ -36,11 +43,11 @@ export const CHECKIN = async (req, res) => {
     } else {
       // Create new attendance record
       attendance = await Attendence.create({
-        employeeId,
+        employee: employeeId,
         date: today,
         timeIn: checkInTime,
         status: "present",
-        companyId: req.user.companyId,
+        company: user.companyId,
       });
     }
 
@@ -57,11 +64,16 @@ export const CHECKOUT = async (req, res) => {
     const employeeId = req.user.userId;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const user = await User.findById(employeeId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     // Find today's attendance record
     const existingAttendance = await Attendence.findOne({
-      employeeId,
+      employee: employeeId,
       date: today,
+      company: user.companyId,
     });
 
     if (!existingAttendance) {
@@ -70,13 +82,13 @@ export const CHECKOUT = async (req, res) => {
         .json({ message: "No check-in record found for today" });
     }
 
-    if (!existingAttendance.checkIn) {
+    if (!existingAttendance.timeIn) {
       return res
         .status(400)
         .json({ message: "Must check-in before checking out" });
     }
 
-    if (existingAttendance.checkOut) {
+    if (existingAttendance.timeOut) {
       return res.status(400).json({ message: "Already checked out for today" });
     }
 
@@ -85,7 +97,7 @@ export const CHECKOUT = async (req, res) => {
     const attendance = await Attendence.findByIdAndUpdate(
       existingAttendance._id,
       {
-        checkOut: checkOutTime,
+        timeOut: checkOutTime,
       },
       { new: true }
     );
@@ -103,7 +115,7 @@ export const GET_MY_ATTENDANCE = async (req, res) => {
     const employeeId = req.user.userId;
     const { startDate, endDate } = req.query;
 
-    const query = { employeeId };
+    const query = { employee: employeeId };
 
     if (startDate && endDate) {
       query.date = {
@@ -133,7 +145,7 @@ export const GET_ALL_ATTENDANCE = async (req, res) => {
   try {
     const { startDate, endDate, employeeId } = req.query;
 
-    const query = { companyId: req.user.companyId };
+    const query = { company: req.user.userId };
 
     if (startDate && endDate) {
       query.date = {
@@ -158,12 +170,10 @@ export const GET_ALL_ATTENDANCE = async (req, res) => {
       .status(200)
       .json({ message: "Attendance records fetched successfully", attendance });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error fetching attendance records",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching attendance records",
+      error: error.message,
+    });
   }
 };
 
@@ -221,18 +231,14 @@ export const GET_ATTENDANCE_REPORT = async (req, res) => {
       },
     ]);
 
-    res
-      .status(200)
-      .json({
-        message: "Attendance report generated successfully",
-        attendance,
-      });
+    res.status(200).json({
+      message: "Attendance report generated successfully",
+      attendance,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error generating attendance report",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error generating attendance report",
+      error: error.message,
+    });
   }
 };

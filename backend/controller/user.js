@@ -3,6 +3,12 @@ import bcrypt from "bcrypt";
 import cloudinary from "cloudinary";
 import jwt from "jsonwebtoken";
 import { parse } from "date-fns";
+import BankInfo from "../models/bank-info.js";
+import PersonalInfo from "../models/personal-info.js";
+import EmergencyContact from "../models/emergency-contact.js";
+import Experience from "../models/experience.js";
+import EducationDetails from "../models/education-details.js";
+import AssestAssignment from "../models/assest-assignment.js";
 export const createUser = async (req, res) => {
   const {
     name,
@@ -304,5 +310,51 @@ export const DISABLE_COMPANY_EMPLOYEES_ACCOUNT = async (req, res) => {
   res.status(200).json({
     message: "Company employees account disabled successfully",
     company,
+  });
+};
+
+export const GET_EMPLOYEE_BY_ID = async (req, res) => {
+  const { id } = req.params;
+  const requestingUser = req.user;
+
+  const employee = await User.findById(id).populate("department designation");
+  if (!employee) {
+    return res.status(404).json({ message: "Employee not found" });
+  }
+
+  // Check if requesting user is from same company or is a company account
+  // if (requestingUser.role !== "company" && requestingUser.userId.toString() !== employee.companyId.toString()) {
+  //   return res.status(403).json({ message: "Unauthorized access - you can only view employees from your company" });
+  // }
+
+  const requester = await User.findById(requestingUser.userId);
+
+  if (
+    requester._id.toString() !== employee.companyId.toString() &&
+    requester.companyId?.toString() !== employee.companyId?.toString()
+  ) {
+    return res.status(403).json({
+      message:
+        "Unauthorized access - you can only view employees from your company",
+    });
+  }
+
+  const bankInfo = await BankInfo.findOne({ employeeId: id });
+  const personalInfo = await PersonalInfo.findOne({ employeeId: id });
+  const emergencyContact = await EmergencyContact.find({ employeeId: id });
+  const experience = await Experience.find({ employeeId: id });
+  const educationDetails = await EducationDetails.find({ employeeId: id });
+  const assestAssignment = await AssestAssignment.find({
+    employeeId: id,
+  }).populate("assestId");
+  res.status(200).json({
+    message: "Employee fetched successfully",
+    employee,
+    bankInfo,
+    personalInfo,
+    emergencyContact,
+    experience,
+    educationDetails,
+    assestAssignment,
   });
 };

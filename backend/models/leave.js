@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const leaveSchema = new mongoose.Schema({
   employee: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
   },
   leaveType: {
     type: String,
@@ -14,7 +14,7 @@ const leaveSchema = new mongoose.Schema({
   endDate: Date,
   company: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
   },
   status: {
     type: String,
