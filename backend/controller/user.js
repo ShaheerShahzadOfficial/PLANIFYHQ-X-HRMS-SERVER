@@ -220,7 +220,28 @@ export const UPDATE_EMPLOYEE = async (req, res) => {
     about,
     joinedAt,
     employeeId,
+    profile,
   } = req.body;
+  let profileData = {};
+  if (profile) {
+    // Check if user has existing profile and delete it
+    // Only upload if profile is a base64 URL
+    if (profile?.url?.startsWith("data:image")) {
+      // Delete existing profile if it exists
+      const existingUser = await User.findById(id);
+      if (existingUser.profile && existingUser.profile.public_id) {
+        await cloudinary.uploader.destroy(existingUser.profile.public_id);
+      }
+
+      const result = await cloudinary.uploader.upload(profile?.url, {
+        folder: "profiles",
+      });
+      profileData = {
+        url: result.secure_url,
+        public_id: result.public_id,
+      };
+    }
+  }
   const employee = await User.findByIdAndUpdate(
     id,
     {
@@ -232,6 +253,9 @@ export const UPDATE_EMPLOYEE = async (req, res) => {
       about,
       joinedAt,
       employeeId,
+      ...(Object.keys(profileData).length > 0
+        ? { profile: profileData }
+        : { profile: profile }),
     },
     { new: true }
   );

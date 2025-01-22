@@ -32,7 +32,7 @@ export const ADD_BANK_DETAILS = async (req, res) => {
 
     const savedDetails = await BankInfo.create(bankDetailsToAdd);
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "Bank details added successfully",
       data: savedDetails,

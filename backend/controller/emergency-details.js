@@ -46,7 +46,7 @@ export const ADD_EMERGENCY_DETAILS = async (req, res) => {
 
     await newEmergencyDetails.save();
 
-    res.status(201).json({
+    res.status(200).json({
       message: "Emergency details added successfully",
       emergencyDetails: newEmergencyDetails,
     });

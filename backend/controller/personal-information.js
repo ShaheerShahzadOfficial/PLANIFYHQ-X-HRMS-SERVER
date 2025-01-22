@@ -23,6 +23,7 @@ export const ADD_PERSONAL_INFO = async (req, res) => {
       "maritalStatus",
       "nationality",
       "religion",
+
       "passportNumber",
       "passportExpiryDate",
       "noofchildren",
@@ -78,7 +79,31 @@ export const UPDATE_PERSONAL_INFO = async (req, res) => {
       return res.status(400).json({ message: "Employee ID is required" });
     }
 
+    const currentDate = new Date();
+
+
     // Check if personal info exists
+
+    if (data.gender) {
+      if (data.gender !== "Male" && data.gender !== "Female") {
+        return res.status(400).json({ message: "Gender must be Male or Female" });
+      }
+    }
+
+    if (data.dateOfBirth) {
+      const birthDate = new Date(data.dateOfBirth);
+      if (birthDate >= currentDate) {
+        return res
+          .status(400)
+          .json({ message: "Date of birth must be in the past" });
+      }
+    }
+
+    if (data.address) {
+      if (data.address.length > 100) {
+        return res.status(400).json({ message: "Address must be less than 100 characters" });
+      }
+    }
 
     if (
       data.noofchildren &&
@@ -90,7 +115,6 @@ export const UPDATE_PERSONAL_INFO = async (req, res) => {
     }
 
     // Validate dates if provided
-    const currentDate = new Date();
 
     if (data.dateOfBirth) {
       const birthDate = new Date(data.dateOfBirth);
@@ -101,14 +125,7 @@ export const UPDATE_PERSONAL_INFO = async (req, res) => {
       }
     }
 
-    if (data.passportExpiryDate) {
-      const passportExpiry = new Date(data.passportExpiryDate);
-      if (passportExpiry <= currentDate) {
-        return res
-          .status(400)
-          .json({ message: "Passport expiry date must be in the future" });
-      }
-    }
+
 
     if (data.passportNumber) {
       const passportNumber = data.passportNumber;

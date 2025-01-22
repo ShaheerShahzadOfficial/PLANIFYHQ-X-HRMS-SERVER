@@ -12,34 +12,32 @@ export const ADD_EDUCATION_DETAILS = async (req, res) => {
     }
 
     // Validate education details fields
-    for (const detail of educationDetails) {
-      if (!detail.degree || !detail.institution || !detail.startDate || !detail.endDate) {
-        return res.status(400).json({
-          success: false,
-          message: "Degree, institution, start date and end date are required for all education details"
-        });
-      }
-
-      // Validate dates
-      const startDate = new Date(detail.startDate);
-      const endDate = new Date(detail.endDate);
-      
-      if (endDate < startDate) {
-        return res.status(400).json({
-          success: false,
-          message: "End date cannot be earlier than start date"
-        });
-      }
+    if (!educationDetails.degree || !educationDetails.institution || !educationDetails.startDate || !educationDetails.endDate) {
+      return res.status(400).json({
+        success: false,
+        message: "Degree, institution, start date and end date are required for education details"
+      });
     }
 
-    const educationDetailsToAdd = educationDetails.map(detail => ({
-      ...detail,
+    // Validate dates
+    const startDate = new Date(educationDetails.startDate);
+    const endDate = new Date(educationDetails.endDate);
+    
+    if (endDate < startDate) {
+      return res.status(400).json({
+        success: false,
+        message: "End date cannot be earlier than start date"
+      });
+    }
+
+    const educationDetailsToAdd = {
+      ...educationDetails,
       employeeId
-    }));
+    };
 
     const savedDetails = await EducationDetails.insertMany(educationDetailsToAdd);
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "Education details added successfully",
       data: savedDetails

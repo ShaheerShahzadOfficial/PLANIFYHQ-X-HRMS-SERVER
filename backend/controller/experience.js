@@ -15,35 +15,41 @@ export const ADD_EXPERIENCE_DETAILS = async (req, res) => {
     if (
       !experienceDetails.companyName ||
       !experienceDetails.designation ||
-      !experienceDetails.startDate ||
-      !experienceDetails.endDate
+      !experienceDetails.startDate
     ) {
       return res.status(400).json({
         success: false,
         message:
-          "Company name, designation, start date and end date are required for experience details",
+          "Company name, designation and start date are required for experience details",
       });
     }
 
     // Validate dates
     const startDate = new Date(experienceDetails.startDate);
-    const endDate = new Date(experienceDetails.endDate);
-
-    if (endDate < startDate) {
-      return res.status(400).json({
-        success: false,
-        message: "End date cannot be earlier than start date",
-      });
+    
+    // Only validate end date if present is false and end date exists
+    if (!experienceDetails.present && experienceDetails.endDate) {
+      const endDate = new Date(experienceDetails.endDate);
+      if (endDate < startDate) {
+        return res.status(400).json({
+          success: false,
+          message: "End date cannot be earlier than start date",
+        });
+      }
     }
 
+    // If present is true, remove end date if it exists
     const experienceDetailsToAdd = {
       ...experienceDetails,
       employeeId,
     };
+    if (experienceDetails.present) {
+      delete experienceDetailsToAdd.endDate;
+    }
 
     const savedDetails = await Experience.create(experienceDetailsToAdd);
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: "Experience details added successfully",
       data: savedDetails,
