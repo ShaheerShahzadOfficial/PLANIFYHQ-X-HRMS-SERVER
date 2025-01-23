@@ -5,9 +5,14 @@ const leaveSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Users",
   },
-  leaveType: {
+  leaveTime: {
     type: String,
-    enum: ["sick", "vacation", "other"],
+    enum: ["Full Day", "First Half", "Second Half"],
+    default: "Full Day",
+  },
+  leaveType: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "LeaveType",
   },
   leaveReason: String,
   startDate: Date,
@@ -26,3 +31,16 @@ const leaveSchema = new mongoose.Schema({
 const Leave = mongoose.model("Leave", leaveSchema);
 
 export default Leave;
+
+const leaveTypeSchema = new mongoose.Schema({
+  name: String,
+  days: Number,
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+  },
+});
+
+const LeaveType = mongoose.model("LeaveType", leaveTypeSchema);
+
+export { LeaveType };

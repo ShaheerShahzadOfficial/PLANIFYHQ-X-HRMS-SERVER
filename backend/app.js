@@ -11,6 +11,7 @@ import personalInfoRouter from "./route/personalInfo.js";
 import educationRouter from "./route/education.js";
 import experienceRouter from "./route/experience.js";
 import bankDetailsRouter from "./route/bank-account.js";
+import LeaveRouter from "./route/leave.js";
 
 const app = express();
 app.use(
@@ -65,7 +66,7 @@ app.get("/", (req, res) => {
       <body>
         <div class="container">
           <div class="emoji">🚀</div>
-          <h1>Welcome to Planify X HRMS!</h1>
+          <h1>Welcome to PlanifyHQ X HRMS!</h1>
           <p>Your all-in-one HR management solution for modern businesses. We're excited to help you streamline your HR processes and boost productivity.</p>
         </div>
       </body>
@@ -83,6 +84,7 @@ app.use("/personal-info", personalInfoRouter);
 app.use("/education", educationRouter);
 app.use("/experience", experienceRouter);
 app.use("/bank-account", bankDetailsRouter);
+app.use("/leaves", LeaveRouter);
 app.use((req, res) => {
   res.status(404).send(`
     <html>
