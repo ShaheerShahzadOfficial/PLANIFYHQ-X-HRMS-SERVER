@@ -151,25 +151,22 @@ export const GET_LEAVES = async (req, res) => {
     // First fetch all employees for this company
     const employees = await User.find({ companyId: req.user.userId });
 
-
     // Get employee IDs
-    const employeeIds = employees.map(emp => emp._id);
+    const employeeIds = employees.map((emp) => emp._id);
 
     // Then fetch leaves for all these employees
-    const leaves = await Leave.find({ 
+    const leaves = await Leave.find({
       employee: { $in: employeeIds },
-      company: req.user.userId 
+      company: req.user.userId,
     })
-    .populate("employee", "-password")
-    .populate("leaveType");
+      .populate("employee", "-password")
+      .populate("leaveType");
 
-
-    res.status(200).json({ 
-      message: "Leaves fetched successfully", 
+    res.status(200).json({
+      message: "Leaves fetched successfully",
       leaves,
-      totalEmployees: employees.length
+      totalEmployees: employees.length,
     });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -434,6 +431,44 @@ export const DELETE_LEAVE = async (req, res) => {
     }
 
     res.status(200).json({ message: "Leave deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const UPDATE_LEAVE_STATUS = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: "Unauthorized access" });
+    }
+
+    // Validate status
+    if (!status || !["approved", "rejected", "pending"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const leave = await Leave.findById(id);
+    if (!leave) {
+      return res.status(404).json({ message: "Leave not found" });
+    }
+
+    // Check if user has permission (must be company admin)
+    if (leave.company.toString() !== req.user.userId) {
+      return res.status(403).json({
+        message: "You are not authorized to approve/reject this leave",
+      });
+    }
+
+    leave.status = status;
+    await leave.save();
+
+    res.status(200).json({ 
+      message: `Leave ${status} successfully`, 
+      leave 
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
