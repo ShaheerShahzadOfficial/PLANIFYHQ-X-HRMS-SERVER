@@ -1,41 +1,29 @@
 import mongoose from "mongoose";
 
 const shiftSchedulingSchema = new mongoose.Schema({
-  name: String,
-  description: String,
+  employee: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+  },
+  
+  departmentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Departments",
+  },
 
-  startDate: Date,
-  minStartTime: Date,
-  maxStartTime: Date,
+  startTime: Date,
 
-  endDate: Date,
-  minEndTime: Date,
-  maxEndTime: Date,
+  endTime: Date,
 
   company: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
 
-  status: {
-    type: String,
-    enum: ["active", "inactive"],
-    default: "active",
-  },
-  for: {
-    // employee ID
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
-  },
-  shiftID: {
+  shiftId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Shift",
   },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
-  },
-  isDeleted: { type: Boolean, default: false },
 });
 
 const ShiftScheduling = mongoose.model(
