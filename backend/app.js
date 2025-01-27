@@ -15,6 +15,7 @@ import LeaveRouter from "./route/leave.js";
 import oemRouter from "./route/oem.js";
 import productRouter from "./route/product.js";
 import activityRouter from "./route/activity.js";
+import clientRouter from "./route/client.js";
 
 const app = express();
 app.use(
@@ -177,6 +178,7 @@ app.use("/leaves", LeaveRouter);
 app.use("/oem", oemRouter);
 app.use("/product", productRouter);
 app.use("/activity", activityRouter);
+app.use("/client", clientRouter);
 app.use((req, res) => {
   res.status(404).send(`
     <html>
