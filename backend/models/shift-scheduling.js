@@ -1,28 +1,15 @@
 import mongoose from "mongoose";
 
 const shiftSchedulingSchema = new mongoose.Schema({
-  employee: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Users",
-  },
-  
-  departmentId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Departments",
-  },
-
+  title: String,
   startTime: Date,
-
+  maxStartTime: Date,
   endTime: Date,
+  minEndTime: Date,
 
   company: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-  },
-
-  shiftId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Shift",
   },
 });
 

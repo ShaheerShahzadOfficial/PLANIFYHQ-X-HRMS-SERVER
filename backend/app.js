@@ -16,6 +16,9 @@ import oemRouter from "./route/oem.js";
 import productRouter from "./route/product.js";
 import activityRouter from "./route/activity.js";
 import clientRouter from "./route/client.js";
+import timeSheetRouter from "./route/timeSheet.js";
+import shiftSchedulingRouter from "./route/shift-scheduling.js";
+import salaryRouter from "./route/salary.js";
 
 const app = express();
 app.use(
@@ -179,6 +182,9 @@ app.use("/oem", oemRouter);
 app.use("/product", productRouter);
 app.use("/activity", activityRouter);
 app.use("/client", clientRouter);
+app.use("/timeSheet", timeSheetRouter);
+app.use("/shift-scheduling", shiftSchedulingRouter);
+app.use("/salary", salaryRouter);
 app.use((req, res) => {
   res.status(404).send(`
     <html>

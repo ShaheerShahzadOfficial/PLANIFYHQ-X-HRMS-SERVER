@@ -1,12 +1,19 @@
-import ShiftScheduling from "../models/shift-scheduling";
+import ShiftScheduling from "../models/shift-scheduling.js";
+import User from "../models/user.js";
 
 export const GET_SHIFT_SCHEDULING = async (req, res) => {
   try {
-    const shiftScheduling = await ShiftScheduling.find({ company: req.user.userId });
-    if (!shiftScheduling.length) {
-      return res.status(404).json({ message: "No shift schedules found" });
-    }
-    res.status(200).json({ message: "Shift scheduling fetched successfully", shiftScheduling });
+    const user = await User.findById(req.user.userId);
+    const query =
+      user.role === "employee"
+        ? { company: user.companyId }
+        : { company: user._id };
+    const shiftScheduling = await ShiftScheduling.find(query);
+  
+    res.status(200).json({
+      message: "Shift scheduling fetched successfully",
+      shiftScheduling,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -15,25 +22,40 @@ export const GET_SHIFT_SCHEDULING = async (req, res) => {
 export const CREATE_SHIFT_SCHEDULING = async (req, res) => {
   try {
     // Validate required fields
-    const { employee, shift, date } = req.body;
-    if (!employee || !shift || !date) {
-      return res.status(400).json({ message: "Employee, shift and date are required fields" });
+    const { title, startTime, maxStartTime, endTime, minEndTime } = req.body;
+    if (!title || !startTime || !endTime) {
+      return res
+        .status(400)
+        .json({ message: "Title, startTime, and endTime are required fields" });
     }
 
-    // Validate if employee already has a shift scheduled for this date
+    // Validate if a shift with the same title already exists
     const existingSchedule = await ShiftScheduling.findOne({
-      employee,
-      date,
-      company: req.user.userId
+      title,
+      $or: [
+        {
+          startTime: { $lte: endTime },
+          endTime: { $gte: startTime },
+        },
+      ],
+      company: req.user.userId,
     });
 
     if (existingSchedule) {
-      return res.status(400).json({ message: "Employee already has a shift scheduled for this date" });
+      return res
+        .status(400)
+        .json({
+          message: "A shift with the same title already exists in the given time range",
+        });
     }
 
     const shiftScheduling = new ShiftScheduling({
-      ...req.body,
-      company: req.user.userId
+      title,
+      startTime,
+      maxStartTime,
+      endTime,
+      minEndTime,
+      company: req.user.userId,
     });
     await shiftScheduling.save();
     res.status(201).json(shiftScheduling);
@@ -55,24 +77,41 @@ export const UPDATE_SHIFT_SCHEDULING = async (req, res) => {
 
     // Validate if user has permission
     if (existingSchedule.company.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "You are not authorized to update this schedule" });
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to update this schedule" });
     }
 
-    // If date or employee is being updated, check for conflicts
-    if (data.date || data.employee) {
+    // If time or title is being updated, check for conflicts
+    if (data.startTime || data.endTime || data.title) {
+      const startTime = data.startTime || existingSchedule.startTime;
+      const endTime = data.endTime || existingSchedule.endTime;
+      const title = data.title || existingSchedule.title;
+
       const conflictSchedule = await ShiftScheduling.findOne({
-        employee: data.employee || existingSchedule.employee,
-        date: data.date || existingSchedule.date,
+        title,
+        $or: [
+          {
+            startTime: { $lte: endTime },
+            endTime: { $gte: startTime },
+          },
+        ],
         _id: { $ne: id },
-        company: req.user.userId
+        company: req.user.userId,
       });
 
       if (conflictSchedule) {
-        return res.status(400).json({ message: "Employee already has a shift scheduled for this date" });
+        return res
+          .status(400)
+          .json({
+            message: "A shift with the same title already exists in the given time range",
+          });
       }
     }
 
-    const shiftScheduling = await ShiftScheduling.findByIdAndUpdate(id, data, { new: true });
+    const shiftScheduling = await ShiftScheduling.findByIdAndUpdate(id, data, {
+      new: true,
+    });
     res.status(200).json(shiftScheduling);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -91,7 +130,9 @@ export const DELETE_SHIFT_SCHEDULING = async (req, res) => {
 
     // Validate if user has permission
     if (schedule.company.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "You are not authorized to delete this schedule" });
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this schedule" });
     }
 
     await ShiftScheduling.findByIdAndDelete(id);
