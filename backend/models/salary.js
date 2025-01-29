@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const salarySchema = new mongoose.Schema({
   employee: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
     required: true,
   },
   netSalary: {
@@ -72,8 +72,9 @@ const salarySchema = new mongoose.Schema({
   },
   company: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
     required: true,
+
   },
 });
 

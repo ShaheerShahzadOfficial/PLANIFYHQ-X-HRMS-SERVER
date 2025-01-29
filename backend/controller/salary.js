@@ -8,10 +8,14 @@ export const GET_SALARIES = async (req, res) => {
       user.role === "employee"
         ? { employee: user._id }
         : { company: user._id };
-    const salaries = await Salary.find(query).populate("employee company");
-    if (!salaries.length) {
-      return res.status(404).json({ message: "No salaries found" });
-    }
+    const salaries = await Salary.find(query).populate({
+      path: "employee",
+      populate: [
+        { path: "department" },
+        { path: "designation" }
+      ]
+    }).populate("company");
+   
     res.status(200).json({
       message: "Salaries fetched successfully",
       salaries,
@@ -23,8 +27,8 @@ export const GET_SALARIES = async (req, res) => {
 
 export const CREATE_SALARY = async (req, res) => {
   try {
-    const { employee, netSalary, earnings, deductions, company } = req.body;
-    if (!employee || !netSalary || !earnings || !deductions || !company) {
+    const { employee, netSalary, earnings, deductions } = req.body;
+    if (!employee || !netSalary || !earnings || !deductions ) {
       return res
         .status(400)
         .json({ message: "All fields are required" });
@@ -35,7 +39,7 @@ export const CREATE_SALARY = async (req, res) => {
       netSalary,
       earnings,
       deductions,
-      company,
+      company: req.user.userId,
     });
     await salary.save();
     res.status(201).json(salary);
@@ -90,3 +94,31 @@ export const DELETE_SALARY = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+
+export const GET_SALARY_BY_ID = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const salary = await Salary.findById(id).populate({
+      path: "employee",
+      populate: [
+        { path: "department" },
+        { path: "designation" }
+      ] 
+    }).populate("company");
+
+    if (!salary) {
+      return res.status(404).json({ message: "Salary not found" });
+    }
+
+    res.status(200).json({
+      message: "Salary fetched successfully",
+      salary,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
