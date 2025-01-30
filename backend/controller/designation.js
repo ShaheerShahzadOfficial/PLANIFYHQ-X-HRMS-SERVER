@@ -1,8 +1,12 @@
 import Designation from "../models/designation.js";
 
 export const CREATE_DESIGNATION = async (req, res) => {
-  const { name } = req.body;
-  const designation = await Designation.create({ name, companyId: req.user.userId });
+  const { name, department } = req.body;
+  const designation = await Designation.create({
+    name,
+    companyId: req.user.userId,
+    departmentId: department,
+  });
   res.status(200).json({ message: "Designation created successfully", designation });
 };
 
