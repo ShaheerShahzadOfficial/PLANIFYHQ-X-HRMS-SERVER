@@ -20,6 +20,7 @@ import timeSheetRouter from "./route/timeSheet.js";
 import shiftSchedulingRouter from "./route/shift-scheduling.js";
 import salaryRouter from "./route/salary.js";
 import resourseSalaryRouter from "./route/resourse/salary.js";
+import projectRouter from "./route/project.js";
 
 const app = express();
 app.use(
@@ -187,6 +188,7 @@ app.use("/timeSheet", timeSheetRouter);
 app.use("/shift-scheduling", shiftSchedulingRouter);
 app.use("/salary", salaryRouter);
 app.use("/resourse/salary", resourseSalaryRouter);
+app.use("/project", projectRouter);
 app.use((req, res) => {
   res.status(404).send(`
     <html>
