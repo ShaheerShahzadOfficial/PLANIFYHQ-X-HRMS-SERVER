@@ -21,6 +21,10 @@ import shiftSchedulingRouter from "./route/shift-scheduling.js";
 import salaryRouter from "./route/salary.js";
 import resourseSalaryRouter from "./route/resourse/salary.js";
 import projectRouter from "./route/project.js";
+import assetTypeRouter from "./route/resourse/asset-type.js";
+import assesmentTypeRouter from "./route/resourse/assesment-type.js";
+import assesmentModeRouter from "./route/resourse/assesment-mode.js";
+import deliveryRouter from "./route/resourse/delivery.js";
 
 const app = express();
 app.use(
@@ -189,6 +193,10 @@ app.use("/shift-scheduling", shiftSchedulingRouter);
 app.use("/salary", salaryRouter);
 app.use("/resourse/salary", resourseSalaryRouter);
 app.use("/project", projectRouter);
+app.use("/resourse/asset-type", assetTypeRouter);
+app.use("/resourse/assesment-type", assesmentTypeRouter);
+app.use("/resourse/assesment-mode", assesmentModeRouter);
+app.use("/resourse/delivery", deliveryRouter);
 app.use((req, res) => {
   res.status(404).send(`
     <html>
