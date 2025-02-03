@@ -84,7 +84,7 @@ export const deleteAssetType = async (req, res) => {
     if (!assetType) {
       return res.status(404).json({ message: "Asset type not found" });
     }
-
+    
     // Check if the asset type is being used anywhere before deleting
     // This is a placeholder. You should implement the actual check based on your data model
     const isAssetTypeInUse = false; // await checkIfAssetTypeIsInUse(id);
