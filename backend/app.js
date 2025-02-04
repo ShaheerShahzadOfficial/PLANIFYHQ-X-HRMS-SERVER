@@ -26,6 +26,7 @@ import assesmentTypeRouter from "./route/resourse/assesment-type.js";
 import assesmentModeRouter from "./route/resourse/assesment-mode.js";
 import deliveryRouter from "./route/resourse/delivery.js";
 import SheetRouter from "./route/resourse/sheet.js";
+import projectCostingRouter from "./route/resourse/project-costing.js";
 
 const app = express();
 app.use(
@@ -199,6 +200,7 @@ app.use("/resourse/assesment-type", assesmentTypeRouter);
 app.use("/resourse/assesment-mode", assesmentModeRouter);
 app.use("/resourse/delivery", deliveryRouter);
 app.use("/resourse/sheet", SheetRouter);
+app.use("/resourse/project-costing", projectCostingRouter);
 app.use((req, res) => {
   res.status(404).send(`
     <html>
