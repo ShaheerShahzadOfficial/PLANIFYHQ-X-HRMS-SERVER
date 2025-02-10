@@ -22,23 +22,16 @@ export const createTimesheet = async (req, res) => {
       });
     }
 
-    // Validate that only one of activity, oem, product, or client is provided
+    // Validate that all required fields are provided
     const typeFields = { activity, oem, product, client };
-    const providedTypes = Object.entries(typeFields).filter(
-      ([_, value]) => value
+    const missingFields = Object.entries(typeFields).filter(
+      ([_, value]) => !value
     );
 
-    if (providedTypes.length === 0) {
+    if (missingFields.length > 0) {
       return res.status(400).json({
         success: false,
-        message: "Please provide one of: activity, oem, product, or client",
-      });
-    }
-
-    if (providedTypes.length > 1) {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot provide multiple types. You provided: ${providedTypes
+        message: `Missing required fields: ${missingFields
           .map(([key]) => key)
           .join(", ")}`,
       });
@@ -52,7 +45,10 @@ export const createTimesheet = async (req, res) => {
       company: user.companyId,
       date,
       hours,
-      [providedTypes[0][0]]: providedTypes[0][1], // Set only the provided type field
+        activity,
+        oem,
+        product,
+        client,
     });
 
     await timesheet.save();

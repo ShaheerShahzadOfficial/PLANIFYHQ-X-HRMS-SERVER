@@ -1,4 +1,5 @@
 import Activity from "../models/activity.js";
+import User from "../models/user.js";
 
 export const createActivity = async (req, res) => {
   try {
@@ -16,7 +17,18 @@ export const createActivity = async (req, res) => {
 
 export const getActivities = async (req, res) => {
   try {
-    const activities = await Activity.find({ companyId: req.user.userId });
+    let companyId;
+    const user = await User.findById(req.user.userId);
+
+    if (user.role === "admin") {
+      companyId = user._id;
+    } else if (user.role === "employee") {
+      companyId = user.companyId;
+    } else {
+      return res.status(403).json({ message: "Unauthorized access" });
+    }
+
+    const activities = await Activity.find({ companyId, status: "active" });
     res.status(200).json({activities});
   } catch (error) {
     res.status(500).json({
