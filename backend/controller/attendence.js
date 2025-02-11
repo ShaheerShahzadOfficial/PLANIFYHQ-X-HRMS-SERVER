@@ -72,7 +72,10 @@ export const CHECKOUT = async (req, res) => {
     // Find today's attendance record
     const existingAttendance = await Attendence.findOne({
       employee: employeeId,
-      date: today,
+      date: {
+        $gte: today,
+        $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000)
+      },
       company: user.companyId,
     });
 
@@ -159,13 +162,12 @@ export const GET_ALL_ATTENDANCE = async (req, res) => {
     }
 
     const attendance = await Attendence.find(query)
-      .populate("employeeId", "name employeeId")
+      .populate("employee", "name profile employeeId")
       .sort({ date: -1 });
 
-    if (!attendance.length) {
-      return res.status(404).json({ message: "No attendance records found" });
-    }
-
+    // if (!attendance.length) {
+    //   return res.status(404).json({ message: "No attendance records found" });
+    // }
     res
       .status(200)
       .json({ message: "Attendance records fetched successfully", attendance });
