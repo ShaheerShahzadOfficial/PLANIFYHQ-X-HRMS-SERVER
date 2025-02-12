@@ -11,7 +11,7 @@ export const CREATE_DESIGNATION = async (req, res) => {
 };
 
 export const GET_DESIGNATIONS = async (req, res) => {
-  const designations = await Designation.find({ companyId: req.user.userId });
+  const designations = await Designation.find({ companyId: req.user.userId }).populate("departmentId");
   res.status(200).json({ message: "Designations fetched successfully", designations });
 };
 

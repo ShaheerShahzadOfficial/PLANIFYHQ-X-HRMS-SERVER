@@ -149,7 +149,7 @@ export const GET_MY_PROFILE = async (req, res) => {
     }
 
     const user = await User.findById(req.user.userId);
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -164,9 +164,9 @@ export const GET_MY_PROFILE = async (req, res) => {
     if (error.name === "CastError") {
       return res.status(400).json({ message: "Invalid user ID format" });
     }
-    res.status(500).json({ 
-      message: "Error fetching profile", 
-      error: error.message 
+    res.status(500).json({
+      message: "Error fetching profile",
+      error: error.message,
     });
   }
 };
@@ -250,6 +250,7 @@ export const UPDATE_EMPLOYEE = async (req, res) => {
     joinedAt,
     employeeId,
     profile,
+    status,
   } = req.body;
   let profileData = {};
   if (profile) {
@@ -282,6 +283,7 @@ export const UPDATE_EMPLOYEE = async (req, res) => {
       about,
       joinedAt,
       employeeId,
+      status,
       ...(Object.keys(profileData).length > 0
         ? { profile: profileData }
         : { profile: profile }),
