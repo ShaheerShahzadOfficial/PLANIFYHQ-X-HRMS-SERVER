@@ -148,7 +148,7 @@ export const GET_MY_PROFILE = async (req, res) => {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    const user = await User.findById(req.user.userId);
+    const user = await User.findById(req.user.userId).populate("department designation");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });

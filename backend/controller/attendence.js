@@ -127,7 +127,9 @@ export const GET_MY_ATTENDANCE = async (req, res) => {
       };
     }
 
-    const attendance = await Attendence.find(query).sort({ date: -1 });
+    const attendance = await Attendence.find(query)
+      .sort({ date: -1 })
+      .populate("employee");
 
     // if (!attendance.length) {
     //   return res.status(404).json({ message: "No attendance records found" });
