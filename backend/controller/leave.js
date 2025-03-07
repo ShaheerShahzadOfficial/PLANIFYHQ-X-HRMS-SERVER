@@ -261,10 +261,19 @@ export const CREATE_LEAVE = async (req, res) => {
     });
 
     // Calculate days requested in current leave
-    const requestedDays =
-      Math.ceil(
-        (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)
-      ) + 1;
+    const requestedDays = (() => {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const totalDays =
+        Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
+
+      // Adjust for leaveTime (Half or Full Day)
+      if (leaveTime === "First Half" || leaveTime === "Second Half") {
+        return Math.round(totalDays / 4); // Half days rounded to nearest whole number
+      }
+
+      return totalDays; // Default for Full Day
+    })();
 
     // Get leave type details
     const leaveTypeDetails = await LeaveType.findById(leaveType);
@@ -465,9 +474,9 @@ export const UPDATE_LEAVE_STATUS = async (req, res) => {
     leave.status = status;
     await leave.save();
 
-    res.status(200).json({ 
-      message: `Leave ${status} successfully`, 
-      leave 
+    res.status(200).json({
+      message: `Leave ${status} successfully`,
+      leave,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
