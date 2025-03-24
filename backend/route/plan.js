@@ -8,4 +8,5 @@ planRouter.post("/create", createPlan);
 planRouter.get("/get", getPlans);
 planRouter.put("/update/:id", updatePlan);
 planRouter.delete("/delete/:id", deletePlan);
+
 export default planRouter;

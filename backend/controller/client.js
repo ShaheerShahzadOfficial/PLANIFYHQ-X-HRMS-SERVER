@@ -1,4 +1,5 @@
 import Client from "../models/client.js";
+import User from "../models/user.js";
 
 const createClient = async (req, res) => {
   try {
@@ -18,7 +19,24 @@ const createClient = async (req, res) => {
 
 const getClients = async (req, res) => {
   try {
-    const clients = await Client.find({ companyId: req.user.userId });
+    // Fetch the user from database first
+    const user = await User.findById(req.user.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    let query = {};
+
+    if (user.role !== "admin") {
+      // If user is not admin, filter by their company ID
+      query = { companyId: user.companyId };
+    } else {
+      // If user is admin, filter by their user ID
+      query = { companyId: user._id };
+    }
+
+    const clients = await Client.find(query);
     res.status(200).json(clients);
   } catch (error) {
     res
