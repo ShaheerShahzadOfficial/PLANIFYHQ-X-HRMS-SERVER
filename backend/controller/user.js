@@ -148,7 +148,9 @@ export const GET_MY_PROFILE = async (req, res) => {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    const user = await User.findById(req.user.userId).populate("department designation");
+    const user = await User.findById(req.user.userId).populate(
+      "department designation"
+    );
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -307,34 +309,129 @@ export const GET_COMPANIES = async (req, res) => {
     .status(200)
     .json({ message: "Companies fetched successfully", companies });
 };
-
 export const UPDATE_COMPANY = async (req, res) => {
-  const { id } = req.params;
-  const {
-    name,
-    email,
-    phoneNumber,
-    designation,
-    department,
-    about,
-    joinedAt,
-    employeeId,
-  } = req.body;
-  const employee = await User.findByIdAndUpdate(
-    id,
-    {
+  try {
+    const { id } = req.params;
+    const {
       name,
       email,
       phoneNumber,
-      designation,
-      department,
+      website,
+      address,
+      currency,
+      status,
+      language,
+      profile,
       about,
-      joinedAt,
-      employeeId,
-    },
-    { new: true }
-  );
-  res.status(200).json({ message: "Employee updated successfully", employee });
+    } = req.body;
+
+    // Validate required fields
+    if (!name || !email) {
+      return res
+        .status(400)
+        .json({ message: "Name and email are required fields" });
+    }
+
+    // Validate name length
+    if (name.length < 2 || name.length > 50) {
+      return res
+        .status(400)
+        .json({ message: "Name must be between 2 and 50 characters" });
+    }
+
+    // Validate email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
+    }
+
+    // Validate phone number if provided
+    if (phoneNumber) {
+      const phoneRegex = /^\+?[1-9]\d{9,14}$/;
+      const phoneStr = String(phoneNumber).replace(/[\s-]/g, "");
+      if (!phoneRegex.test(phoneStr)) {
+        return res
+          .status(400)
+          .json({ message: "Please enter a valid phone number" });
+      }
+    }
+
+    // Validate website if provided
+    if (website) {
+      const urlRegex =
+        /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?$/;
+      if (!urlRegex.test(website)) {
+        return res
+          .status(400)
+          .json({ message: "Please enter a valid website URL" });
+      }
+    }
+
+    // Handle profile image upload if provided
+    let profileData = {};
+    if (profile && profile.startsWith("data:")) {
+      try {
+        // Delete existing profile if it exists
+        const existingCompany = await User.findById(id);
+        if (
+          existingCompany &&
+          existingCompany.profile &&
+          existingCompany.profile.public_id
+        ) {
+          await cloudinary.uploader.destroy(existingCompany.profile.public_id);
+        }
+
+        const result = await cloudinary.uploader.upload(profile, {
+          folder: "profiles",
+        });
+        profileData = {
+          url: result.secure_url,
+          public_id: result.public_id,
+        };
+      } catch (cloudinaryError) {
+        console.error("Error uploading image to cloudinary:", cloudinaryError);
+        return res
+          .status(500)
+          .json({ message: "Error uploading profile image" });
+      }
+    }
+
+    const updatedCompany = await User.findByIdAndUpdate(
+      id,
+      {
+        name,
+        email,
+        phoneNumber,
+        website,
+        address,
+        currency,
+        status,
+        language,
+        about,
+        updatedAt: Date.now(),
+        ...(Object.keys(profileData).length > 0
+          ? { profile: profileData }
+          : profile
+          ? { profile }
+          : {}),
+      },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedCompany) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    res.status(200).json({
+      message: "Company updated successfully",
+      updatedCompany,
+    });
+  } catch (error) {
+    console.error("Error updating company:", error);
+    res
+      .status(500)
+      .json({ message: error.message || "Error updating company details" });
+  }
 };
 
 export const DELETE_COMPANY = async (req, res) => {
