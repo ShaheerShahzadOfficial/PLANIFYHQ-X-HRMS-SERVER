@@ -9,6 +9,11 @@ const timeSheetSchema = new mongoose.Schema({
   oem: { type: mongoose.Schema.Types.ObjectId, ref: "OEM" },
   product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
   client: { type: mongoose.Schema.Types.ObjectId, ref: "Client" },
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

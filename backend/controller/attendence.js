@@ -164,15 +164,36 @@ export const GET_ALL_ATTENDANCE = async (req, res) => {
     }
 
     const attendance = await Attendence.find(query)
-      .populate("employee", "name profile employeeId")
+      .populate({
+        path: "employee",
+        select: "name profile employeeId department",
+        populate: {
+          path: "department",
+          select: "shift",
+          populate: {
+            path: "shift"
+          }
+        }
+      })
       .sort({ date: -1 });
+
+    // Get all employees
+    const employees = await User.find({ 
+      companyId: req.user.userId,
+      role: "employee",
+      status: "active"
+    }).select("name email profile employeeId department");
 
     // if (!attendance.length) {
     //   return res.status(404).json({ message: "No attendance records found" });
     // }
     res
       .status(200)
-      .json({ message: "Attendance records fetched successfully", attendance });
+      .json({ 
+        message: "Attendance records fetched successfully", 
+        attendance,
+        employees 
+      });
   } catch (error) {
     res.status(500).json({
       message: "Error fetching attendance records",

@@ -45,10 +45,10 @@ export const createTimesheet = async (req, res) => {
       company: user.companyId,
       date,
       hours,
-        activity,
-        oem,
-        product,
-        client,
+      activity,
+      oem,
+      product,
+      client,
     });
 
     await timesheet.save();
@@ -188,6 +188,59 @@ export const deleteTimesheet = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to delete timesheet entry",
+      error: error.message,
+    });
+  }
+};
+
+// Update timesheet status
+export const updateTimesheetStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: "Status is required",
+      });
+    }
+
+    // Check if status is valid
+    if (!["pending", "approved", "rejected"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Invalid status. Status must be pending, approved, or rejected",
+      });
+    }
+
+    // Validate timesheet exists
+    const timesheet = await TimeSheet.findById(id);
+    if (!timesheet) {
+      return res.status(404).json({
+        success: false,
+        message: "Timesheet entry not found",
+      });
+    }
+
+    // Update status
+    const updatedTimesheet = await TimeSheet.findByIdAndUpdate(
+      id,
+      { status, updatedAt: Date.now() },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: updatedTimesheet,
+      message: "Timesheet status updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update timesheet status",
       error: error.message,
     });
   }
